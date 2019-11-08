@@ -13,43 +13,64 @@
 
 </head>
 <body>
+  <div class="container">
+    <div class="container1">
+      <div id="jap-chart">
+          <strong>Distribution by Provence (color: total amount raised)</strong>
+          <a class="reset" href="javascript:japChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+          <span class="reset" style="display: none;"> | Current filter: <span class="filter"></span></span>
 
-<div class="container">
+          <div class="clearfix"></div>
+      </div>
 
-
-    <div id="jap-chart">
-        <strong>Distribution by Provence (color: total amount raised)</strong>
-        <a class="reset" href="javascript:japChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-        <span class="reset" style="display: none;"> | Current filter: <span class="filter"></span></span>
-
-        <div class="clearfix"></div>
+      <div class="clearfix"></div>
     </div>
+    <div class=container2>
+  <ul class="nav nav-tabs">
+    <li role="presentation" class="active"><a data-toggle="tab" href="#home">Home</a></li>
+    <li role="presentation"><a data-toggle="tab" href="#menu1">Menu 1</a></li>
+    <li role="presentation"><a data-toggle="tab" href="#menu2">Menu 2</a></li>
+  </ul>
+  <div class="tab-content">
+    <div id="home" class="tab-pane fade in active">
+      <div id="in-state-chart">
+          <strong>By Industries</strong> (y: number of deals, x: total amount raised in millions, radius: amount raised)
+          <a class="reset" href="javascript:inStateChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
-    <div class="clearfix"></div>
-
-    <div id="industry-chart">
-        <strong>By Industries</strong> (y: number of deals, x: total amount raised in millions, radius: amount raised)
-        <a class="reset" href="javascript:industryChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-
-        <div class="clearfix"></div>
+          <div class="clearfix"></div>
+      </div>
     </div>
+    <div id="menu1" class="tab-pane fade">
+      <div id="industry-chart">
+          <strong>By Industries</strong> (y: number of deals, x: total amount raised in millions, radius: amount raised)
+          <a class="reset" href="javascript:industryChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
-    <div class="clearfix"></div>
+          <div class="clearfix"></div>
+      </div>
 
-    <div id="round-chart">
-        <strong>By Rounds</strong> (y: number of deals, x: total amount raised in millions, radius: amount raised)
-        <a class="reset" href="javascript:roundChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+      <div class="clearfix"></div>
 
-        <div class="clearfix"></div>
+      <div id="round-chart">
+          <strong>By Rounds</strong> (y: number of deals, x: total amount raised in millions, radius: amount raised)
+          <a class="reset" href="javascript:roundChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+
+          <div class="clearfix"></div>
+      </div>
+
+      <div class="clearfix"></div>
+
+      <div>
+          <a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+      </div>
     </div>
-
-    <div class="clearfix"></div>
-
-    <div>
-        <a href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+    <div id="menu2" class="tab-pane fade">
+      <h3>Menu 2</h3>
+      <p>Some content in menu 2.</p>
     </div>
+  </div>
+  </div>
+  </div>
 
-</div>
 
 
 <script type="text/javascript" src="../js/promise-polyfill.js"></script>
@@ -57,19 +78,23 @@
 <script type="text/javascript" src="../js/d3.js"></script>
 <script type="text/javascript" src="../js/crossfilter.js"></script>
 <script type="text/javascript" src="../js/dc.js"></script>
+<script type="text/javascript" src="../js/d3-bootstrap.js"></script>
 <script type="text/javascript">
     var numberFormat = d3.format(".2f");
 
 
     var japChart = dc.geoChoroplethChart("#jap-chart");
     var industryChart = dc.bubbleChart("#industry-chart");
+    var inStateChart = dc.pieChart("#in-state-chart");
     var roundChart = dc.bubbleChart("#round-chart");
 
-  var  width = 990,
-      height = 700;
+  var  width = 990, // svg width
+      height = 500;// svg height
 
+      d3.select('a[data-toggle="tab"]').on('shown.bs.tab', function () {
+        this // displayed tab
 
-
+      });
 var svg = d3.select("#jap-chart")
     .attr("width", width)
     .attr("height", height);
@@ -133,8 +158,8 @@ var svg = d3.select("#jap-chart")
 
         d3.json("../geo/japan.json").then(function (statesJson) {
           console.log('map', statesJson)
-            japChart.width(990)
-                    .height(700)
+            japChart.width(990)//box width
+                    .height(350)//box height
                     .dimension(states)
                     .group(stateRaisedSum)
                     .colors(d3.scaleQuantize().range(["#E2F2FF", "#C4E4FF", "#9ED2FF", "#81C5FF", "#6BBAFF", "#51AEFF", "#36A2FF", "#1E96FF", "#0089FF", "#0061B5"]))
@@ -146,7 +171,7 @@ var svg = d3.select("#jap-chart")
 
                     .projection(projection
                       .center([137, 34])
-	                    .scale(900)
+	                    .scale(900)//scale of the map
 	                    .translate([width / 2, height / 2])
 
                     )
@@ -198,6 +223,30 @@ var svg = d3.select("#jap-chart")
             industryChart.xAxis().tickFormat(function (s) {
                 return s + "M";
             });
+
+            inStateChart.width(300)
+                            .height(200)
+                            .colors(d3.scaleOrdinal(d3.schemeCategory10))
+                            .keyAccessor(function (p) {
+                                return p.value.amountRaised;
+                            })
+                            .valueAccessor(function (p) {
+                                return p.value.deals;
+                            })
+                            .transitionDuration(10)
+                            .radius(100)
+                            .innerRadius(30)
+                            .dimension(industries)
+
+                            .group(statsByIndustries)
+                            .title(function (p) {
+                                return p.key
+                                        + "\n"
+                                        + "Amount Raised: " + numberFormat(p.value.amountRaised) + "M\n"
+                                        + "Number of Deals: " + numberFormat(p.value.deals);
+                            });
+
+
 
             roundChart.width(990)
                     .height(200)
